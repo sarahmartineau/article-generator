@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur d'articles</title>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: white;
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 { color: #e94560; text-align: center; }
+    label { display: block; margin-top: 20px; margin-bottom: 6px; }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #16213e;
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    textarea { height: 120px; }
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover { background: #c73652; }
+    #resultat { margin-top: 40px; }
+    #image-generee { width: 100%; border-radius: 12px; margin-bottom: 20px; }
+    #article-generee { background: #16213e; padding: 20px; border-radius: 12px; white-space: pre-wrap; }
+    #loading { display: none; text-align: center; margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>🎯 Générateur d'articles</h1>
+
+  <label>Thème de l'article</label>
+  <input type="text" id="theme" placeholder="Ex: L'intelligence artificielle en 2025">
+
+  <label>Structure souhaitée</label>
+  <textarea id="structure" placeholder="Ex: Introduction, 3 parties avec sous-titres, conclusion avec call-to-action"></textarea>
+
+  <label>Date de publication</label>
+  <input type="date" id="date">
+
+<label>Langue</label>
+<select id="langue">
+  <option value="fr">Français → ideta William</option>
+  <option value="en">Anglais → Webflow</option>
+</select>
+
+  <button onclick="generer()">✨ Générer l'article</button>
+
+  <div id="loading">⏳ Génération en cours...</div>
+
+  <div id="resultat" style="display:none">
+    <img id="image-generee" src="" alt="Image générée">
+    <div id="article-generee"></div>
+  </div>
+
+  <script>
+    async function generer() {
+      const theme = document.getElementById("theme").value;
+      const structure = document.getElementById("structure").value;
+      const date = document.getElementById("date").value;
+
+      if (!theme || !structure || !date) {
+        alert("Remplis tous les champs !");
+        return;
+      }
+
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("resultat").style.display = "none";
+
+      const response = await fetch("/generer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme, structure, date, langue: document.getElementById("langue").value })
+      });
+
+      const data = await response.json();
+
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("resultat").style.display = "block";
+      document.getElementById("image-generee").src = data.image_url;
+      document.getElementById("article-generee").textContent = data.article;
+    }
+  </script>
+</body>
+</html>
