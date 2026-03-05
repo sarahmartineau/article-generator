@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - Générateur d'articles</title>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: white;
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 { color: #e94560; text-align: center; }
+    h2 { color: #e94560; margin-top: 40px; font-size: 18px; }
+    label { display: block; margin-top: 20px; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #16213e;
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    textarea { height: 120px; }
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover { background: #c73652; }
+    .nav { text-align: center; margin-bottom: 30px; }
+    .nav a { color: #e94560; text-decoration: none; margin: 0 15px; font-size: 16px; }
+    .nav a:hover { text-decoration: underline; }
+    #confirmation { display: none; text-align: center; margin-top: 20px; color: #2ed573; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">← Retour au générateur</a>
+  </div>
+
+  <h1>⚙️ Settings</h1>
+
+  <h2>📝 Structure de l'article</h2>
+  <label>Structure par défaut</label>
+  <textarea id="structure" placeholder="Ex: Introduction, 3 parties avec sous-titres H2, conclusion avec call-to-action vers Ideta"></textarea>
+
+  <h2>🎨 Style de l'image</h2>
+  <label>Style visuel</label>
+  <select id="style_image">
+    <option value="professional and modern, corporate style">Professionnel et moderne</option>
+    <option value="minimalist and clean, white background">Minimaliste</option>
+    <option value="colorful and vibrant, creative style">Coloré et créatif</option>
+    <option value="dark and tech, futuristic style">Tech et futuriste</option>
+  </select>
+
+  <h2>✍️ Ton de rédaction</h2>
+  <label>Ton</label>
+  <select id="ton">
+    <option value="professionnel et informatif">Professionnel et informatif</option>
+    <option value="décontracté et accessible">Décontracté et accessible</option>
+    <option value="expert et technique">Expert et technique</option>
+    <option value="inspirant et motivant">Inspirant et motivant</option>
+  </select>
+
+  <h2>🏢 Informations sur la marque</h2>
+  <label>Description de la marque (utilisée dans les articles)</label>
+  <textarea id="marque" placeholder="Ex: Ideta est une plateforme no-code qui permet de créer des callbots et chatbots facilement..."></textarea>
+
+  <button onclick="sauvegarder()">💾 Sauvegarder les settings</button>
+  <div id="confirmation">✅ Settings sauvegardés !</div>
+
+  <script>
+    // Charger les settings existants
+    window.onload = () => {
+      document.getElementById("structure").value = localStorage.getItem("structure") || "";
+      document.getElementById("style_image").value = localStorage.getItem("style_image") || "professional and modern, corporate style";
+      document.getElementById("ton").value = localStorage.getItem("ton") || "professionnel et informatif";
+      document.getElementById("marque").value = localStorage.getItem("marque") || "";
+    };
+
+    function sauvegarder() {
+      localStorage.setItem("structure", document.getElementById("structure").value);
+      localStorage.setItem("style_image", document.getElementById("style_image").value);
+      localStorage.setItem("ton", document.getElementById("ton").value);
+      localStorage.setItem("marque", document.getElementById("marque").value);
+      document.getElementById("confirmation").style.display = "block";
+      setTimeout(() => document.getElementById("confirmation").style.display = "none", 3000);
+    }
+  </script>
+</body>
+</html>

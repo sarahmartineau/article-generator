@@ -3,6 +3,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import requests
+import json
 
 load_dotenv()
 
@@ -14,11 +15,19 @@ STORYCHIEF_API_KEY = os.getenv("STORYCHIEF_API_KEY")
 def index():
     return send_from_directory(".", "index.html")
 
+@app.route("/settings.html")
+def settings():
+    return send_from_directory(".", "settings.html")
+
 @app.route("/generer", methods=["POST"])
 def generer():
     data = request.json
     theme = data["theme"]
-    structure = data["structure"]
+    consignes = data.get("consignes", "")
+    structure = data.get("structure", "Introduction, 3 parties avec sous-titres, conclusion")
+    ton = data.get("ton", "professionnel et informatif")
+    style_image = data.get("style_image", "professional and modern, corporate style")
+    marque = data.get("marque", "")
     date = data["date"]
     langue = data.get("langue", "fr")
 
@@ -27,7 +36,14 @@ def generer():
         model="gpt-4o-mini",
         messages=[{
             "role": "user",
-            "content": f"""Écris un article en {'français' if langue == 'fr' else 'anglais'} sur le thème : {theme}. Structure : {structure}. Formate le contenu en HTML avec des balises <h2>, <p>, <ul> etc. Sans balise <html> ou <body>.
+            "content": f"""Écris un article en {'français' if langue == 'fr' else 'anglais'} sur le thème : {theme}.
+
+Structure : {structure}
+Ton : {ton}
+Consignes additionnelles : {consignes}
+{f"Informations sur la marque à mentionner : {marque}" if marque else ""}
+
+Formate le contenu en HTML avec des balises <h2>, <p>, <ul> etc. Sans balise <html> ou <body>.
 
 Réponds UNIQUEMENT avec ce JSON (sans markdown) :
 {{
@@ -38,8 +54,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
 }}"""
         }]
     )
-    
-    import json
+
     result = json.loads(response.choices[0].message.content)
     article = result["content"]
     excerpt = result["excerpt"]
@@ -49,12 +64,12 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
     # Générer l'image
     image_response = client.images.generate(
         model="dall-e-3",
-        prompt=f"Professional image for an article about: {theme}",
-        size="1024x1024"
+        prompt=f"Professional image for an article about: {theme}. Style: {style_image}",
+        size="1792x1024"
     )
     image_url = image_response.data[0].url
 
-    # Publier sur StoryChief
+    # Publier sur StoryChief immédiatement avec l'URL fraîche
     storychief_response = requests.post(
         "https://api.storychief.io/1.0/stories",
         headers={
@@ -74,6 +89,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
         }
     )
 
+
     print("StoryChief status:", storychief_response.status_code)
     print("StoryChief response:", storychief_response.text[:300])
 
@@ -81,13 +97,6 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
         "article": article,
         "image_url": image_url,
         "storychief_status": storychief_response.status_code
-    })
-
-    return jsonify({
-        "article": article,
-        "image_url": image_url,
-        "storychief_status": storychief_response.status_code,
-        "storychief_response": storychief_response.text
     })
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Générateur d'articles</title>
+  <title>Générateur d'articles sur StoryChief</title>
   <style>
     body {
       background: #1a1a2e;
@@ -14,7 +14,7 @@
     }
     h1 { color: #e94560; text-align: center; }
     label { display: block; margin-top: 20px; margin-bottom: 6px; }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       border-radius: 8px;
@@ -41,28 +41,37 @@
     #image-generee { width: 100%; border-radius: 12px; margin-bottom: 20px; }
     #article-generee { background: #16213e; padding: 20px; border-radius: 12px; white-space: pre-wrap; }
     #loading { display: none; text-align: center; margin-top: 20px; font-size: 18px; }
+    .nav { text-align: right; margin-bottom: 20px; }
+    .nav a { color: #e94560; text-decoration: none; font-size: 16px; }
+    .nav a:hover { text-decoration: underline; }
+    .settings-recap { background: #16213e; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; color: #aaa; }
   </style>
 </head>
 <body>
-  <h1>🎯 Générateur d'articles</h1>
+  <div class="nav">
+    <a href="/settings.html">⚙️ Settings</a>
+  </div>
+
+  <h1>🎯 Générateur d'articles sur StoryChief</h1>
 
   <label>Thème de l'article</label>
   <input type="text" id="theme" placeholder="Ex: L'intelligence artificielle en 2025">
 
-  <label>Structure souhaitée</label>
-  <textarea id="structure" placeholder="Ex: Introduction, 3 parties avec sous-titres, conclusion avec call-to-action"></textarea>
+  <label>Consignes additionnelles</label>
+  <textarea id="consignes" placeholder="Ex: Insiste sur l'aspect sécurité, mentionne notre produit Ideta en conclusion..."></textarea>
 
   <label>Date de publication</label>
   <input type="date" id="date">
 
-<label>Langue</label>
-<select id="langue">
-  <option value="fr">Français → ideta William</option>
-  <option value="en">Anglais → Webflow</option>
-</select>
+  <label>Langue</label>
+  <select id="langue">
+    <option value="fr">Français → ideta William</option>
+    <option value="en">Anglais → Webflow</option>
+  </select>
+
+  <div class="settings-recap" id="settings-recap"></div>
 
   <button onclick="generer()">✨ Générer l'article</button>
-
   <div id="loading">⏳ Génération en cours...</div>
 
   <div id="resultat" style="display:none">
@@ -71,13 +80,26 @@
   </div>
 
   <script>
+    window.onload = () => {
+      const structure = localStorage.getItem("structure") || "Non définie";
+      const ton = localStorage.getItem("ton") || "Non défini";
+      const style_image = localStorage.getItem("style_image") || "Non défini";
+      document.getElementById("settings-recap").innerHTML = 
+        `⚙️ <b>Structure :</b> ${structure.substring(0, 60)}... | <b>Ton :</b> ${ton} | <b>Style image :</b> ${style_image}`;
+    };
+
     async function generer() {
       const theme = document.getElementById("theme").value;
-      const structure = document.getElementById("structure").value;
+      const consignes = document.getElementById("consignes").value;
       const date = document.getElementById("date").value;
+      const langue = document.getElementById("langue").value;
+      const structure = localStorage.getItem("structure") || "";
+      const ton = localStorage.getItem("ton") || "professionnel et informatif";
+      const style_image = localStorage.getItem("style_image") || "professional and modern";
+      const marque = localStorage.getItem("marque") || "";
 
-      if (!theme || !structure || !date) {
-        alert("Remplis tous les champs !");
+      if (!theme || !date) {
+        alert("Remplis au moins le thème et la date !");
         return;
       }
 
@@ -87,15 +109,14 @@
       const response = await fetch("/generer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ theme, structure, date, langue: document.getElementById("langue").value })
+        body: JSON.stringify({ theme, consignes, structure, ton, style_image, marque, date, langue })
       });
 
       const data = await response.json();
-
       document.getElementById("loading").style.display = "none";
       document.getElementById("resultat").style.display = "block";
       document.getElementById("image-generee").src = data.image_url;
-      document.getElementById("article-generee").textContent = data.article;
+      document.getElementById("article-generee").innerHTML = data.article;
     }
   </script>
 </body>
